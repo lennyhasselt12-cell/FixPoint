@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101318">
+  <meta name="description" content="FixPoint – Reparaturaufträge einfach verwalten.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+  <title>FixPoint</title>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span>Fix</span><b>Point</b></div>
+    <button class="icon-btn" id="backupBtn" aria-label="Datensicherung" title="Datensicherung">↥</button>
+  </header>
+
+  <main>
+    <section class="welcome">
+      <div>
+        <p class="eyebrow">REPARATURVERWALTUNG</p>
+        <h1>Deine Aufträge.</h1>
+        <p class="muted">Alles im Blick. Direkt auf deinem iPhone.</p>
+      </div>
+      <button class="primary add-main" id="newOrderBtn">＋ Neuer Auftrag</button>
+    </section>
+
+    <section class="stats" aria-label="Übersicht">
+      <article class="stat-card"><span class="stat-label">Offen</span><strong id="openCount">0</strong></article>
+      <article class="stat-card"><span class="stat-label">In Arbeit</span><strong id="workCount">0</strong></article>
+      <article class="stat-card"><span class="stat-label">Abgeschlossen</span><strong id="doneCount">0</strong></article>
+    </section>
+
+    <section class="orders-section">
+      <div class="section-head">
+        <div><p class="eyebrow">VERWALTUNG</p><h2>Aufträge</h2></div>
+        <span class="count-pill" id="totalCount">0 gesamt</span>
+      </div>
+      <div class="tools">
+        <label class="search-wrap"><span>⌕</span><input id="searchInput" type="search" placeholder="Auftrag oder Gerät suchen…"></label>
+        <select id="filterStatus" aria-label="Status filtern">
+          <option value="">Alle Status</option>
+          <option>Eingegangen</option><option>Unterwegs</option><option>In Reparatur</option>
+          <option>Wartet auf Ersatzteil</option><option>Abgeschlossen</option><option>Rückversand</option><option>Übergeben</option><option>Abgebrochen</option>
+        </select>
+      </div>
+      <div id="orderList" class="order-list"></div>
+      <div id="emptyState" class="empty-state">
+        <div class="empty-icon">⌁</div>
+        <h3>Noch keine Aufträge</h3>
+        <p>Lege deinen ersten Reparaturauftrag an.</p>
+        <button class="secondary" id="emptyAddBtn">＋ Auftrag erstellen</button>
+      </div>
+    </section>
+
+    <section class="footnote">
+      <span class="lock">▣</span>
+      <p>Deine Daten bleiben auf diesem iPhone. Exportiere regelmäßig eine Sicherung.</p>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <button class="nav-item active"><span>▦</span>Übersicht</button>
+    <button class="nav-item" id="navNew"><span>＋</span>Neuer Auftrag</button>
+    <button class="nav-item" id="navBackup"><span>↥</span>Backup</button>
+  </nav>
+
+  <dialog id="orderDialog">
+    <form id="orderForm" method="dialog">
+      <div class="dialog-head">
+        <div><p class="eyebrow">FIXPOINT</p><h2 id="dialogTitle">Neuer Auftrag</h2></div>
+        <button type="button" class="close-btn" id="closeDialog" aria-label="Schließen">×</button>
+      </div>
+      <input type="hidden" id="orderId">
+      <div class="field-grid">
+        <label class="field"><span>Auftragsnummer</span><input id="orderNumber" readonly></label>
+        <label class="field"><span>Status</span>
+          <select id="status">
+            <option>Eingegangen</option><option>Unterwegs</option><option>In Reparatur</option>
+            <option>Wartet auf Ersatzteil</option><option>Abgeschlossen</option><option>Rückversand</option><option>Übergeben</option><option>Abgebrochen</option>
+          </select>
+        </label>
+      </div>
+      <label class="field"><span>Kundenname</span><input id="customer" maxlength="80" placeholder="Vor- und Nachname"></label>
+      <label class="field"><span>Kontakt (optional)</span><input id="contact" maxlength="120" placeholder="Telefon oder E-Mail"></label>
+      <div class="field-grid">
+        <label class="field"><span>Gerät</span><input id="device" required maxlength="100" placeholder="z. B. Bluetooth-Lautsprecher"></label>
+        <label class="field"><span>Kategorie</span>
+          <select id="category"><option>Elektronik</option><option>Spielzeug</option><option>Audio</option><option>Computer-Zubehör</option><option>Haushaltsgerät</option><option>Sonstiges</option></select>
+        </label>
+      </div>
+      <label class="field"><span>Fehlerbeschreibung</span><textarea id="issue" rows="3" maxlength="1000" placeholder="Was funktioniert nicht?"></textarea></label>
+      <label class="field"><span>Notizen / Arbeitsschritte</span><textarea id="notes" rows="3" maxlength="1500" placeholder="Befund, Absprachen, bereits erledigte Arbeiten …"></textarea></label>
+      <div class="field-grid">
+        <label class="field"><span>Reparaturpreis (€)</span><input id="price" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00"></label>
+        <label class="field"><span>Ersatzteile (€)</span><input id="partsCost" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0,00"></label>
+      </div>
+      <label class="field"><span>Ersatzteil / Material (optional)</span><input id="parts" maxlength="150" placeholder="z. B. Schalter, Kabel …"></label>
+      <label class="field"><span>Fotos (optional)</span><input id="photos" type="file" accept="image/*" capture="environment" multiple></label>
+      <div id="photoPreview" class="photo-preview"></div>
+      <div class="form-actions">
+        <button type="button" class="danger-text hidden" id="deleteBtn">Auftrag löschen</button>
+        <span class="spacer"></span>
+        <button type="button" class="secondary" id="cancelBtn">Abbrechen</button>
+        <button type="submit" class="primary">Speichern</button>
+      </div>
+      <p class="tiny-note">Speichere nur Daten, die du für den Auftrag wirklich brauchst. Kläre Fotos und Kontaktdaten vorher mit dem Kunden ab.</p>
+    </form>
+  </dialog>
+
+  <dialog id="backupDialog">
+    <div class="dialog-head"><div><p class="eyebrow">DATENSICHERUNG</p><h2>Backup</h2></div><button class="close-btn" id="closeBackup" aria-label="Schließen">×</button></div>
+    <p class="muted">Erstelle regelmäßig eine Sicherungsdatei. Beim Import werden vorhandene Aufträge durch die Sicherung ersetzt.</p>
+    <button class="primary full" id="exportBtn">↓ Sicherung exportieren</button>
+    <label class="secondary full import-label">↑ Sicherung importieren<input type="file" id="importFile" accept="application/json"></label>
+    <p class="tiny-note">Die Datei enthält Auftragsdaten und gegebenenfalls gespeicherte Fotos. Bewahre sie an einem sicheren Ort auf.</p>
+  </dialog>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
